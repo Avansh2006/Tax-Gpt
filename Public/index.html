@@ -120,6 +120,7 @@
     </div>
 
     <script>
+       const backendURL =  "https://tax-gpt-f4k5.onrender.com";
         async function getAdvice() {
             const incomeSources = document.getElementById("incomeSources").value;
             const deductions = document.getElementById("deductions").value;
@@ -137,25 +138,18 @@
             responseDiv.innerHTML = "⏳ Generating advice... Please wait.";
 
             try {
-                const response = await fetch("/get-advice", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ incomeSources, deductions })
-                });
+        const response = await fetch(`${backendURL}/get-advice`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ incomeSources, deductions })
+        });
 
-                const data = await response.json();
-
-      
-                let formattedAdvice = data.advice
-                    .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>") // Replace **bold** with <b> tag
-                    .replace(/•/g, "<li>") // Replace bullet points
-                    .replace(/\n/g, "<br>"); // Add line breaks for readability
-
-                responseDiv.innerHTML = `<p>${formattedAdvice}</p>`;
-            } catch (error) {
-                responseDiv.innerHTML = "❌ Error fetching advice. Please try again.";
-            }
-        }
+        const data = await response.json();
+        responseDiv.innerHTML = `<p>${data.advice}</p>`;
+    } catch (error) {
+        responseDiv.innerHTML = "❌ Error fetching advice. Please try again.";
+    }
+}
     </script>
 
 </body>
