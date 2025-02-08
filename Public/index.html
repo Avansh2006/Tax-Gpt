@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart ITR Filing Chatbot</title>
+    <style>
+   
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 30px;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            max-width: 500px;
+            margin: auto;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+
+        h1 {
+            color: #2c3e50;
+            font-size: 24px;
+        }
+
+        p {
+            font-size: 14px;
+            color: #555;
+        }
+
+       
+        input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+      
+        button {
+            width: 95%;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        /* Response Box */
+        #response {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+            color: #2c3e50;
+            text-align: left;
+            display: none;
+            position: relative;
+            line-height: 1.6;
+        }
+
+    
+        #response::before {
+            content: "🤖 AI Advice";
+            font-weight: bold;
+            color: #3498db;
+            display: block;
+            font-size: 18px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+      
+        #response ul {
+            padding-left: 20px;
+            margin-top: 5px;
+        }
+
+        #response ul li {
+            margin-bottom: 5px;
+        }
+
+    
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Smart ITR Filing Chatbot 💰</h1>
+        <p>Get AI-powered recommendations for selecting the right ITR form and maximizing tax savings.</p>
+
+        <input type="text" id="incomeSources" placeholder="Enter your income sources (e.g., Salary, Business)">
+        <input type="text" id="deductions" placeholder="Enter deductions considered (e.g., 80C, 80D, Home Loan)">
+        <button onclick="getAdvice()">Get Advice</button>
+
+        <div id="response"></div>
+        <p id="errorMessage" class="error"></p>
+    </div>
+
+    <script>
+        async function getAdvice() {
+            const incomeSources = document.getElementById("incomeSources").value;
+            const deductions = document.getElementById("deductions").value;
+            const responseDiv = document.getElementById("response");
+            const errorMessage = document.getElementById("errorMessage");
+
+            if (!incomeSources || !deductions) {
+                errorMessage.textContent = "⚠️ Please enter both income sources and deductions.";
+                responseDiv.style.display = "none";
+                return;
+            }
+
+            errorMessage.textContent = "";
+            responseDiv.style.display = "block";
+            responseDiv.innerHTML = "⏳ Generating advice... Please wait.";
+
+            try {
+                const response = await fetch("/get-advice", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ incomeSources, deductions })
+                });
+
+                const data = await response.json();
+
+      
+                let formattedAdvice = data.advice
+                    .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>") // Replace **bold** with <b> tag
+                    .replace(/•/g, "<li>") // Replace bullet points
+                    .replace(/\n/g, "<br>"); // Add line breaks for readability
+
+                responseDiv.innerHTML = `<p>${formattedAdvice}</p>`;
+            } catch (error) {
+                responseDiv.innerHTML = "❌ Error fetching advice. Please try again.";
+            }
+        }
+    </script>
+
+</body>
+</html>
