@@ -7,7 +7,13 @@ const bodyParser = require("body-parser");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors()); 
+const allowedOrigins = ["https://tax-gpt.netlify.app"];
+
+app.use(cors({
+    origin: allowedOrigins,
+    methods: "GET,POST,OPTIONS",
+    allowedHeaders: "Content-Type,Authorization"
+}));
 
 app.use(bodyParser.json());
 
@@ -37,7 +43,8 @@ async function generateITRAdvice(incomeSources, deductions) {
         return "Error generating tax advice. Please try again.";
     }
 }
-
+// ✅ Fix: Handle CORS Preflight Requests
+app.options("*", cors());
 // Generating Tax Advice
 app.post("/get-advice", async (req, res) => {
     const { incomeSources, deductions } = req.body;
