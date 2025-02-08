@@ -1,3 +1,4 @@
+// Load required libraries
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
@@ -5,63 +6,40 @@ const axios = require("axios");
 const bodyParser = require("body-parser");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
-const allowedOrigins = ["https://tax-gpt.netlify.app"];
-
-app.use(cors({
-    origin: allowedOrigins,
-    methods: "GET,POST,OPTIONS",
-    allowedHeaders: "Content-Type,Authorization"
-}));
-
+// ✅ Enable CORS (Allow frontend requests)
+app.use(cors());
 app.use(bodyParser.json());
 
-
+// Load API key from .env
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 
-// Function to generate tax advice using Gemine
+// ✅ Function to Generate ITR Advice
 async function generateITRAdvice(incomeSources, deductions) {
     const prompt = `
-    You are a supreme absolute tax assistant helping users determine the correct ITR form and tax-saving options.
+    You are a supreme tax assistant helping users determine the correct ITR form and tax-saving options.
     The user has the following income sources: ${incomeSources}.
     They are considering deductions under: ${deductions}.
     
     Recommend the appropriate ITR form and suggest possible tax-saving investments.
-    Keep the response concise and easy to understand. Don't say consult a professional.
+    Keep the response concise and easy to understand.
     `;
 
     try {
-        const response = await fetch(`${backendURL}/get-advice`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ incomeSources, deductions })
+        const response = await axios.post(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+            contents: [{ parts: [{ text: prompt }] }]
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        // 🔹 Convert Markdown to HTML: Replace **bold** with <b> tags
-        let formattedAdvice = data.advice
-            .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>") // Convert **bold** to <b> tag
-            .replace(/\n/g, "<br>"); // Add line breaks
-
-        responseDiv.innerHTML = `<p>${formattedAdvice}</p>`;
+        return response.data.candidates?.[0]?.content?.parts?.[0]?.text || "No response generated.";
     } catch (error) {
-        console.error("Fetch error:", error);
-        responseDiv.innerHTML = "❌ Error fetching advice. Please try again.";
+        console.error("Error generating ITR advice:", error.message);
+        return "Error generating tax advice. Please try again.";
     }
 }
 
-// ✅ Fix: Handle CORS Preflight Requests
-app.options("*", cors());
-// Generating Tax Advice
+// ✅ API Route for Generating ITR Advice
 app.post("/get-advice", async (req, res) => {
     const { incomeSources, deductions } = req.body;
 
@@ -73,15 +51,12 @@ app.post("/get-advice", async (req, res) => {
     res.json({ advice });
 });
 
-// Serve the frontend (HTML + JS)
-app.use(express.static("public"));
-
+// ✅ Default Route for Testing
 app.get("/", (req, res) => {
     res.send("Backend is working! 🚀");
 });
 
+// Start Server
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
-
-
