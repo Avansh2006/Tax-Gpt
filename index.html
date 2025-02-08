@@ -140,13 +140,28 @@
             try {
         const response = await fetch(`${backendURL}/get-advice`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify({ incomeSources, deductions })
         });
 
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
         const data = await response.json();
-        responseDiv.innerHTML = `<p>${data.advice}</p>`;
+        
+        // 🔹 Convert Markdown to HTML (Fix Bold, Italic, and Lists)
+        let formattedAdvice = data.advice
+            .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")  // Convert **bold** to <b> tag
+            .replace(/\*(.*?)\*/g, "<i>$1</i>")  // Convert *italic* to <i> tag
+            .replace(/•\s?(.*?)(\n|$)/g, "<li>$1</li>")  // Convert bullet points
+            .replace(/\n/g, "<br>");  // Preserve line breaks
+
+        responseDiv.innerHTML = `<p>${formattedAdvice}</p>`;
     } catch (error) {
+        console.error("Fetch error:", error);
         responseDiv.innerHTML = "❌ Error fetching advice. Please try again.";
     }
 }
