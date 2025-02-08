@@ -51,6 +51,9 @@ app.post("/get-advice", async (req, res) => {
 // Serve the frontend (HTML + JS)
 app.use(express.static("public"));
 
+app.get("/", (req, res) => {
+    res.send("Backend is working! 🚀");
+});
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
