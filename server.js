@@ -33,16 +33,32 @@ async function generateITRAdvice(incomeSources, deductions) {
     `;
 
     try {
-        const response = await axios.post(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
-            contents: [{ parts: [{ text: prompt }] }]
+        const response = await fetch(`${backendURL}/get-advice`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ incomeSources, deductions })
         });
 
-        return response.data.candidates?.[0]?.content?.parts?.[0]?.text || "No response generated.";
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        // 🔹 Convert Markdown to HTML: Replace **bold** with <b> tags
+        let formattedAdvice = data.advice
+            .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>") // Convert **bold** to <b> tag
+            .replace(/\n/g, "<br>"); // Add line breaks
+
+        responseDiv.innerHTML = `<p>${formattedAdvice}</p>`;
     } catch (error) {
-        console.error("Error generating response:", error.message);
-        return "Error generating tax advice. Please try again.";
+        console.error("Fetch error:", error);
+        responseDiv.innerHTML = "❌ Error fetching advice. Please try again.";
     }
 }
+
 // ✅ Fix: Handle CORS Preflight Requests
 app.options("*", cors());
 // Generating Tax Advice
