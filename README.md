@@ -32,5 +32,5 @@
 ## 🚀 **Setup Instructions**
 ### **1️⃣ Clone the Repository**
 ```sh
-git clone https://github.com/your-username/tax-gpt.git
-cd tax-gpt
+git clone https://github.com/Avansh2006/Tax-Gpt.git
+cd Tax-Gpt
