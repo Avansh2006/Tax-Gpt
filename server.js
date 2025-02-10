@@ -1,4 +1,4 @@
-// Load required libraries
+ 
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
@@ -8,7 +8,7 @@ const bodyParser = require("body-parser");
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// ✅ Enable CORS (Allow frontend requests)
+//  Enable CORS (Allow frontend requests)
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -16,7 +16,7 @@ app.use(bodyParser.json());
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 
-// ✅ Function to Generate ITR Advice
+// Function to Generate Advice
 async function generateITRAdvice(incomeSources, deductions) {
     const prompt = `
     You are a supreme tax assistant helping users determine the correct ITR form and tax-saving options.
@@ -39,7 +39,7 @@ async function generateITRAdvice(incomeSources, deductions) {
     }
 }
 
-// ✅ API Route for Generating ITR Advice
+//  API Route 
 app.post("/get-advice", async (req, res) => {
     const { incomeSources, deductions } = req.body;
 
@@ -51,12 +51,12 @@ app.post("/get-advice", async (req, res) => {
     res.json({ advice });
 });
 
-// ✅ Default Route for Testing
+// testing
 app.get("/", (req, res) => {
     res.send("Backend is working! 🚀");
 });
 
-// Start Server
+
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
